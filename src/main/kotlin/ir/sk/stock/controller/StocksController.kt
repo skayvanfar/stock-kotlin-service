@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 
 @RestController
-@RequestMapping("/api/v1/stock")
+@RequestMapping("/api/v1/stocks")
 @Validated
 class StocksController(private val stockService: StockService) {
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
