@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  stock-service:
+    image: 'stock-service:latest'
+    restart: on-failure
+    depends_on:
+      mysqldb:
+        condition: service_healthy
+    env_file: ./.env
+    ports:
+      - "8080:8080"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysqldb:3306/${MYSQL_DATABASE}
+      - SPRING_DATASOURCE_USERNAME=$MYSQL_USER
+      - SPRING_DATASOURCE_PASSWORD=$MYSQL_PASSWORD
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+
+  mysqldb:
+    image: 'mysql:8.0'
+    restart: always
+    env_file: ./.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./src/main/resources/db:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=$MYSQL_DATABASE
+      - MYSQL_USER=$MYSQL_USER
+      - MYSQL_PASSWORD=$MYSQL_PASSWORD
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
